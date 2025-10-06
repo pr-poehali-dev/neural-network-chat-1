@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,8 @@ const TrainingSection = () => {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const handleYoutubeUpload = () => {
     if (!youtubeUrl.trim()) return;
@@ -118,13 +120,28 @@ const TrainingSection = () => {
             </TabsContent>
 
             <TabsContent value="video" className="space-y-4 mt-6">
-              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
+              <input
+                type="file"
+                ref={videoInputRef}
+                className="hidden"
+                accept="video/*"
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (files && files.length > 0) {
+                    handleFileUpload("Видео");
+                  }
+                }}
+              />
+              <div 
+                className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer"
+                onClick={() => videoInputRef.current?.click()}
+              >
                 <Icon name="Upload" size={48} className="mx-auto text-muted-foreground mb-4" />
                 <h3 className="font-medium mb-2">Загрузи видео файл</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Поддерживаются форматы: MP4, AVI, MOV, WebM
                 </p>
-                <Button onClick={() => handleFileUpload("Видео")} variant="outline">
+                <Button onClick={(e) => { e.stopPropagation(); videoInputRef.current?.click(); }} variant="outline">
                   <Icon name="FolderOpen" size={16} className="mr-2" />
                   Выбрать файл
                 </Button>
@@ -132,13 +149,29 @@ const TrainingSection = () => {
             </TabsContent>
 
             <TabsContent value="image" className="space-y-4 mt-6">
-              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
+              <input
+                type="file"
+                ref={imageInputRef}
+                className="hidden"
+                accept="image/*"
+                multiple
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (files && files.length > 0) {
+                    handleFileUpload("Изображение");
+                  }
+                }}
+              />
+              <div 
+                className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer"
+                onClick={() => imageInputRef.current?.click()}
+              >
                 <Icon name="ImagePlus" size={48} className="mx-auto text-muted-foreground mb-4" />
                 <h3 className="font-medium mb-2">Загрузи изображения</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Поддерживаются форматы: JPG, PNG, GIF, WebP
                 </p>
-                <Button onClick={() => handleFileUpload("Изображение")} variant="outline">
+                <Button onClick={(e) => { e.stopPropagation(); imageInputRef.current?.click(); }} variant="outline">
                   <Icon name="FolderOpen" size={16} className="mr-2" />
                   Выбрать файлы
                 </Button>

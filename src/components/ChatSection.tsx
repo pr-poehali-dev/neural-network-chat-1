@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,7 @@ const ChatSection = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [currentApp, setCurrentApp] = useState<Message['appData'] | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = () => {
     if (!inputValue.trim()) return;
@@ -380,7 +381,25 @@ document.getElementById('taskInput').addEventListener('keypress', (e) => {
 
         <div className="border-t border-border p-4 bg-muted/30">
           <div className="flex gap-2">
-            <Button variant="outline" size="icon" className="flex-shrink-0">
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*,video/*,.pdf,.doc,.docx,.txt"
+              multiple
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  console.log('Выбраны файлы:', Array.from(files).map(f => f.name));
+                }
+              }}
+            />
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="flex-shrink-0"
+              onClick={() => fileInputRef.current?.click()}
+            >
               <Icon name="Paperclip" size={18} />
             </Button>
             <Input
