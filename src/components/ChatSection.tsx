@@ -35,20 +35,22 @@ const ChatSection = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [currentApp, setCurrentApp] = useState<Message['appData'] | null>(null);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() && attachedFiles.length === 0) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: inputValue,
+      content: inputValue || "[Прикреплённые файлы]",
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
+    setAttachedFiles([]);
     setIsTyping(true);
 
     setTimeout(() => {
@@ -379,8 +381,41 @@ document.getElementById('taskInput').addEventListener('keypress', (e) => {
           </div>
         </ScrollArea>
 
-        <div className="border-t border-border p-4 bg-muted/30">
-          <div className="flex gap-2">
+        <div className="border-t border-border bg-muted/30">
+          {attachedFiles.length > 0 && (
+            <div className="p-4 pb-2">
+              <div className="flex flex-wrap gap-2">
+                {attachedFiles.map((file, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 bg-background border border-border rounded-lg px-3 py-2 text-sm"
+                  >
+                    <Icon 
+                      name={
+                        file.type.startsWith('image/') ? 'Image' :
+                        file.type.startsWith('video/') ? 'Video' :
+                        'File'
+                      } 
+                      size={16} 
+                      className="text-primary" 
+                    />
+                    <span className="max-w-[150px] truncate">{file.name}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 -mr-1"
+                      onClick={() => {
+                        setAttachedFiles(prev => prev.filter((_, i) => i !== index));
+                      }}
+                    >
+                      <Icon name="X" size={14} />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="p-4 flex gap-2">
             <input
               type="file"
               ref={fileInputRef}
@@ -390,7 +425,7 @@ document.getElementById('taskInput').addEventListener('keypress', (e) => {
               onChange={(e) => {
                 const files = e.target.files;
                 if (files && files.length > 0) {
-                  console.log('Выбраны файлы:', Array.from(files).map(f => f.name));
+                  setAttachedFiles(Array.from(files));
                 }
               }}
             />
@@ -411,7 +446,7 @@ document.getElementById('taskInput').addEventListener('keypress', (e) => {
             />
             <Button
               onClick={handleSend}
-              disabled={!inputValue.trim()}
+              disabled={!inputValue.trim() && attachedFiles.length === 0}
               className="flex-shrink-0 gap-2"
             >
               <Icon name="Send" size={18} />
